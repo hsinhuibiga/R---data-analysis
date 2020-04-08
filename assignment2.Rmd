@@ -1,0 +1,485 @@
+---
+title :"FIT5197 assignment 2"
+student name :HsinHui Lin
+student number: 28464176
+output word_document
+---
+## A1
+---
+The logistic regression is most appropriate for the problem.
+For logistic regression is used to measure the relationship between the categorical dependent variable and one or more independent variables and it could estimate probabilities by using the cumulative logistic distribution.
+linear regression is applied in finding relationship between two continuous variables.
+The main propose of logistic regression is to classify and the data required to classify for understanding.
+---
+```{r}
+# read the csv file
+LoanData_train = read.csv("LoanData_train.csv", stringsAsFactors = F)
+LoanData_test = read.csv("LoanData_test.csv", stringsAsFactors = F)
+
+LoanData_train$loan_amnt =as.factor(LoanData_train$loan_amnt)
+LoanData_test$loan_amnt = as.factor(LoanData_test$loan_amnt)
+
+#summary the model
+model_loan= glm(loan_amnt ~., data = LoanData_train, family = binomial(link="logit"))
+                
+summary(model_loan)
+```
+
+## A2
+
+---
+That command could not improve the model.Because grade is the outcome of the variable.
+---
+
+```{r}
+# read file
+
+LoanData_train = read.csv("LoanData_train.csv", stringsAsFactors = F)
+LoanData_test = read.csv("LoanData_test.csv", stringsAsFactors = F)
+
+LoanData_train$grade=as.numeric(LoanData_train$grade)
+LoanData_test$grade=as.numeric(LoanData_test$grade)
+
+LoanData_train$loan_amnt =as.factor(LoanData_train$loan_amnt)
+LoanData_test$loan_amnt = as.factor(LoanData_test$loan_amnt)
+
+#summary the model
+model_loan_compare= glm(loan_amnt ~., data = LoanData_train, family = binomial(link="logit"))
+                
+summary(model_loan_compare)
+```
+
+## A3
+
+---
+Explain the meaning of the ”Estimate” and ”Std. Error” columns in the Coefficients table. Why are there more rows in the coefficients table than there are variables in the data?
+
+"Std. Error" is the standard deviation of its sampling distribution or an estimate of that standard deviation.
+
+
+---
+```{r a3, echo=TRUE}
+# read the csv file
+LoanData_train = read.csv("LoanData_train.csv", stringsAsFactors = F)
+LoanData_test = read.csv("LoanData_test.csv", stringsAsFactors = F)
+
+
+LoanData_train$loan_amnt =as.factor(LoanData_train$loan_amnt)
+LoanData_test$loan_amnt = as.factor(LoanData_test$loan_amnt)
+
+#summary the model
+model_loan= glm(loan_amnt ~., data = LoanData_train, family = binomial(link="logit"))
+                
+summary(model_loan)
+```
+
+## A4
+
+
+Use prob = predict(model, loantest, type =′ response′)
+
+```{r}
+LoanData_train$grade=as.character(LoanData_train$grade)
+LoanData_test$grade=as.character(LoanData_test$grade)
+predict_probs= predict(model_loan, newdata = LoanData_test, type ="response")
+
+predicted_loan_status = rep(0, nrow(LoanData_test))
+for (i in 1:length(predicted_loan_status)){
+  if (predict_probs[i]>0.5){
+    predicted_loan_status[i]="Fully Paid"
+  }else{
+    predicted_loan_status[i]="Charged Off"
+  }
+}
+
+tp = tn = fp =fn =0
+for (i in 1:length(predicted_loan_status)){
+  if ((LoanData_test$grade[i]=="Fully Paid") && (predicted_loan_status[i]=="Charged Off")){
+    tp= tp+1
+  }else if (LoanData_test$grade[i]=="Charged Off ") &&(predicted_loan_status[i]=="Fully Paid"){
+    tn = tn+1
+  }else if (LoanData_test$grade[i]=="Fully Paid") 
+    && (predicted_loan_status[i]=="Charged Off")
+}else {
+  fp= fp+1
+}
+
+
+(m = matrix(c(tp, fp, fn, tn), 2, 2, byrow = T))
+
+(precision = tp/(tp+fp))
+
+(recall =tp/(tp+fp))
+
+(accuracy=(tp+tn)/sum(m))
+
+```
+
+
+## A5
+---
+```{r}
+LoanData_train$grade[which(LoanData_train$grade == "Fully Paid")] = "Lower" LoanData_train$grade[which(LoanData_train$grade == "Fully Paid")] = "Lower" LoanData_train$grade[which(LoanData_train$grade == "Charged Off")] = "Lower" LoanData_test$grade[which(LoanData_test$grade == "Charged Off")] = "Lower" 
+LoanData_train$grade[which(LoanData_train$grade == "Charged Off")] = "Lower" 
+LoanData_test$grade[which(LoanData_test$grade == "Chardge Off")] = "Lower" 
+LoanData_train$grade[which(LoanData_train$grade == "Charged Off")] = "Lower" 
+
+```
+
+---
+## A6
+---
+Now consider a model which simply predicts that all loans will be fully paid. What proportion of the test data does this model predict accurately? If the simpler model predicts whether loans will be paid correctly on the test data, more often than the more complicated model, does that mean we should prefer the simpler model? Why, why not? (Hint: consider other possible measures of success for classifiers).
+---
+## B1
+---
+There are some missing value in the data and need to list them up. Go to check the original data and also found the empty value. So try to google the value on the internet.
+---
+
+```{r }
+auto_mpg_train = read.csv("auto_mpg_train.csv", stringsAsFactors = F)
+auto_mpg_test= read.csv("auto_mpg_test.csv")
+```
+
+## add the missing 6 values.
+```{r}
+auto_mpg_train$horsepower[33] = "75"
+auto_mpg_train$horsepower[127] = "84"
+auto_mpg_train$horsepower[281] = "51"
+auto_mpg_train$horsepower[287] = "132"
+auto_mpg_train$horsepower[305] = "78"
+auto_mpg_train$horsepower[325] = "82"
+```
+
+## in the numeric format
+```{r}
+auto_mpg_train$horsepower = as.numeric(auto_mpg_train$horsepower)
+```
+
+## B2
+---
+Visualize the relationships by pairing the plot mpg and the other variables
+---
+```{r}
+auto_mpg_train$car.name = as.factor(auto_mpg_train$car.name)
+pairs(auto_mpg_train)
+```
+---
+as see from the picture. There is no clear linear correlation in mpg and car name.
+Between mpg ,cylinders, displacement, horsepower, weight are negative correlations.
+It could be observed that mpg and acceleration, model year and origin are positive correlations.
+Based on the pair plots, the predictors are all variables only the car name is not a variable. 
+---
+
+## B3
+```{r}
+modell = lm(mpg ~ cylinders + displacement+horsepower+weight + acceleration +model.year+origin,data = auto_mpg_train)
+summary(modell)
+```
+
+
+---
+There are some points could be seem from the metrics.
+1. The p-value suggests the importance of the predicting. Acceleration presents insignificance to mpg ; cylinders and horsepower could be insignificant at 5 % level.
+2. The median is nearly 0. Then, check the residuals are fine or not, and still could be improved. Because the dependencies between the predictors, the distribution is not too different to symmetric.
+3. The variance measured by the standard error which aquired from mean. 
+4. The model is 82% of the training data by the R-square value. It could be considerd as a good fit.
+---
+
+## B4 
+---
+Get the result of MSE is 8.462446
+---
+```{r}
+# define a mse function
+mse = function(x, y) mean((x -y) ^2)
+
+# test the fitted model using the "auto mpg test.csv", calculate the MSE
+mpg_predicted = predict(modell, newdata = auto_mpg_test)
+cat("Test MSE = ",mse(auto_mpg_test$mpg, mpg_predicted),"\n")
+```
+
+
+## B5
+
+```{r}
+# new model
+
+auto_mpg_train$newfeature = auto_mpg_train$acceleration/auto_mpg_train$horsepower
+model_new = lm(mpg~cylinders+displacement +horsepower +weight+acceleration+model.year+origin+newfeature, data = auto_mpg_train)
+
+# check quality
+summary(model_new)
+```
+
+```{r}
+auto_mpg_test$newfeature = auto_mpg_test$acceleration/auto_mpg_test$horsepower
+mpg_predicted = predict(model_new , newdata = auto_mpg_test)
+cat(" New MSE = ",mse(auto_mpg_test$mpg,mpg_predicted),"\n")
+```
+
+## C1
+---
+In many practical problems, p(x) is difficult to sample directly, so we need to ask for other means to sample. Since p(x) is too complicated to sample in the program directly, then I set a program to sample the distribution q(x) such as Gaussian distribution, and then reject specific samples according to a certain method to achieve a distribution close to p(x). Purpose, where q(x) is called the proposal distribution.
+
+
+(Reference from https://www.slideshare.net/Eniod/prml-reading-chapter-11-sampling-method)
+
+The specific operation is as follows, set a convenient sampling function q(x), and a constant k such that p(x) is always below kq(x). (Refer to the figure above)
+
+- x-axis direction: sample a from the q(x) distribution. (If it is Gaussian, use the tricky and faster algorithm described earlier.)
+- y-axis direction: Sample u from a uniform distribution (0, kq(a)).
+- If it falls to the gray area: u > p(a), refuse, otherwise accept this sampling
+- Repeat the above process
+
+In the case of high dimensions, Rejection Sampling has two problems. The first is that the appropriate q distribution is hard to find, and the second is that it is difficult to determine a reasonable k value. These two problems lead to a high rejection rate and an increase in useless calculations.
+
+Use rejection sampling to do the modeling.
+e represents 2.71828 which equals to a constant.
+Choose pdf p(x) = 1/2e^2x for x≥0
+---
+```{r}
+
+# rejection sampling
+#upper bound on x
+B=8
+#target distribution
+pt = function(x) 1/(2*exp(2*x))
+
+# target distribution, ignoring normaliser
+q = function(x) exp(2*2*x)
+#proposal distribution
+p = 1.0/B
+
+#start rejection sampling
+samples = rep(0, 200)
+i=1
+repeat{
+  if (i> 200) break
+  x = B * runif(1)
+  ratio = q(x)
+  u = runif(1)
+  if (u < ratio){
+    samples[i] =x
+    i =i+1
+  }
+}
+
+#plot to check
+par(mfrow = c(1,2))
+y = sapply(samples,pt)
+plot(samples, y)
+hist(samples, freq=F, breaks=10)
+```
+
+## C2
+---
+Solution:
+1.Write the joint probability distribution 
+
+Pr(C, S, R, W)=Pr (W| R,S)Pr(S|C)Pr(R|C)Pr(C)
+Where C =Cloudy(true/false), S= Sprinkler(true/false),R = Rain(true/false),and W= Wet Grass(true/false) 
+
+2.On this model which variables are independent of Rain? Explain your reasoning.
+
+Sprinkler and Cloudy are independent of Rain. 
+
+The nodes in the directed acyclic graph of the Bayesian network represent random variables, which can be observable variables, or potential variables, unknown parameters, and so on. The arrows connecting the two nodes indicate that the two random variables are causally or non-conditionally independent. The random variables could be conditionally independent of each other when the two nodes are not linked. If two nodes are connected by a single arrow, indicating that one of the nodes is "parents" and the other is "descendants or children," the two nodes will generate a conditional probability value.
+
+In Figure 1, Cloudy is the parent of rain and Sprinkler is not relevant to Rain.
+
+---
+## C3
+
+
+```{r}
+f <- function(c, r, w){
+  p<- 1
+  p
+}
+
+c <- TRUE
+r <- FALSE
+w <- TRUE
+
+result <- f(c, r, w)
+
+result
+```
+
+```{r}
+cpt_c = c(0.5, 0.5)
+cpt_s_given_c = matrix(c(0.5, 0.5, 0.9, 0.1), 2, 2, byrow = F)
+cpt_r_given_c = matrix(c(0.8, 0.2, 0.2, 0.8), 2, 2, byrow =F)
+cpt_w_given_sr = matrix(c(1, 0.1, 0.1, 0.01, 0, 0.9, 0.9, 0.99), 2, 4, byrow =T)
+
+p_c_given_sr = function(s ,r) {
+  p = cpt_c * cpt_s_given_c[s+ 1,] * cpt_r_given_c[r+1, ]
+  return(p / sum(p))
+}
+
+p_s_given_crw = function(c, r, w) {
+  if ( r== 0){
+    ind = c(1,2)
+  }else if (r==1){
+    ind = c(3,4)
+  }
+  p = cpt_s_given_c[, c+1] * cpt_w_given_sr[w +1, ind]
+  return(p / sum(p))
+}
+
+p_r_given_csw = function(c , s, w) {
+  if (s== 0){
+    ind = c(1,3)
+  } else if (s == 1) {
+    ind = c(2,4)
+  }
+  p = cpt_r_given_c[, c+1] * cpt_w_given_sr [w+1, ind]
+  return (p/ sum(p))
+}
+
+p_w_given_sr = function(s, r){
+  if ((s==0) && (r==0)) {
+    ind = 1
+  } else if ((s == 1) && (r==0)){
+    ind = 2
+  }else if ((s==0) && (r ==1)){
+    ind = 3
+  } else {
+    ind = 4
+  }
+  return(cpt_w_given_sr[, ind])
+}
+
+samples = matrix(0, 1000, 4)
+colnames(samples) = c("C", "S", "R", "W")
+samples[1, ] =1
+for (i in 2:1000){
+  
+  # sample for C
+  p = p_c_given_sr(samples[i -1, "S"], samples[i -1 ,"R"])
+  u = runif(1)
+  samples[i, "C"] = ifelse(u < p[1], 0 ,1)
+  
+  #sample for S
+  p = p_s_given_crw(samples[i, "C"], samples[i -1, "R"], samples[i -1, "W"])
+  u = runif(1)
+  samples[i, "S"]= ifelse(u < p[1], 0 ,1)
+  
+  #samples for R
+  p = p_r_given_csw(samples[i, "C"], samples[i, "S"], samples[i - 1, "W"])
+  u = runif(1)
+  samples[i, "R"] = ifelse(u < p[1], 0, 1)
+
+  #samples for W
+  p = p_w_given_sr(samples[i, "S"], samples[i, "R"])
+  u = runif(1)
+  samples[i, "W"] = ifelse(u < p[1], 0, 1)
+}
+  
+data = as.data.frame(samples[-c(1:100),])
+(table(data[, c("W", "C")])/900)
+```
+
+
+## C4
+---
+solution:
+The timing of the Gibbs sampling procedure is applied in the unknown conditoin of the joint distribution P(X, Y), but the conditional probability P(X|Y), P(Y|X), P(X), P(Y) of a single variable is known. The samples generated by random numbers to count the joint probability distribution.
+The Gibbs sampling program is a case study of the Monte Carlo Rokov Algorithm (MCMC) and a particular case of the Metropolis-Hasting sampling program. We can use the Gibbs or Metropolis-Hasting sampling program to calculate the joint probability distribution of the Bayesian network.
+The program first takes a distribution Y0 as the initial value, then uses the Monte Carlo method to generate the X1 distribution through (X, Y0), and then uses (X1, Y) to produce the Y1 distribution. So we get the following iterative program.
+
+Algorithm GibbsSampling(X, Y)
+  Y[0] = random initialize a distribution
+  For i = 1 to N
+    Generate X[i] from P(X | Y[i-1])
+    Generate Y[i] from P(Y | X[i])
+  Return {X[N], Y[N]}
+End Algorithm
+
+---
+## C5
+Gibbs sampling
+
+```{r}
+cpt_c = c(0.5, 0.5)
+cpt_s_given_c = matrix(c(0.5, 0.5, 0.9, 0.1), 2, 2, byrow = F)
+cpt_r_given_c = matrix(c(0.8, 0.2, 0.2, 0.8), 2, 2, byrow =F)
+cpt_w_given_sr = matrix(c(1, 0.1, 0.1, 0.01, 0, 0.9, 0.9, 0.99), 2, 4, byrow =T)
+
+p_c_given_sr = function(s ,r) {
+  p = cpt_c * cpt_s_given_c[s+ 1,] * cpt_r_given_c[r+1, ]
+  return(p / sum(p))
+}
+
+p_s_given_crw = function(c, r, w) {
+  if ( r== 0){
+    ind = c(1,2)
+  }else if (r==1){
+    ind = c(3,4)
+  }
+  p = cpt_s_given_c[, c+1] * cpt_w_given_sr[w +1, ind]
+  return(p / sum(p))
+}
+
+p_r_given_csw = function(c , s, w) {
+  if (s== 0){
+    ind = c(1,3)
+  } else if (s == 1) {
+    ind = c(2,4)
+  }
+  p = cpt_r_given_c[, c+1] * cpt_w_given_sr [w+1, ind]
+  return (p/ sum(p))
+}
+
+p_w_given_sr = function(s, r){
+  if ((s==0) && (r==0)) {
+    ind = 1
+  } else if ((s == 1) && (r==0)){
+    ind = 2
+  }else if ((s==0) && (r ==1)){
+    ind = 3
+  } else {
+    ind = 4
+  }
+  return(cpt_w_given_sr[, ind])
+}
+
+samples = matrix(0, 1000, 4)
+colnames(samples) = c("C", "S", "R", "W")
+samples[1, ] =1
+for (i in 2:1000){
+  
+  # sample for C
+  p = p_c_given_sr(samples[i -1, "S"], samples[i -1 ,"R"])
+  u = runif(1)
+  samples[i, "C"] = ifelse(u < p[1], 0 ,1)
+  
+  #sample for S
+  p = p_s_given_crw(samples[i, "C"], samples[i -1, "R"], samples[i -1, "W"])
+  u = runif(1)
+  samples[i, "S"]= ifelse(u < p[1], 0 ,1)
+  
+  #samples for R
+  p = p_r_given_csw(samples[i, "C"], samples[i, "S"], samples[i - 1, "W"])
+  u = runif(1)
+  samples[i, "R"] = ifelse(u < p[1], 0, 1)
+
+  #samples for W
+  p = p_w_given_sr(samples[i, "S"], samples[i, "R"])
+  u = runif(1)
+  samples[i, "W"] = ifelse(u < p[1], 0, 1)
+}
+  
+data = as.data.frame(samples[-c(1:100),])
+(table(data[, c("W", "C")])/900)
+
+```
+
+```{r}
+(table(data[,c("S", "R")])/900)
+```
+
+
+
+
